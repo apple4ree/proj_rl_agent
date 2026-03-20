@@ -1,0 +1,7 @@
+2026-03-13 01:34:07 | INFO    | Random               | IS: 8.81 bps | Sharpe: -1.836
+2026-03-13 01:34:07 | INFO    | TWAP                 | IS: 9.50 bps | Sharpe: -3.554
+2026-03-13 01:34:07 | INFO    | VWAP                 | IS: 9.50 bps | Sharpe: -3.554
+2026-03-13 01:34:07 | INFO    | Aggressive           | IS: 8.77 bps | Sharpe: -2.756
+2026-03-13 01:34:08 | INFO    | Patient              | IS: 9.44 bps | Sharpe: -3.602
+2026-03-13 01:34:08 | INFO    | Belief               | IS: 9.50 bps | Sharpe: -3.554
+2026-03-13 01:34:08 | INFO    | Results saved: logs/eval_results.json (18 episodes)

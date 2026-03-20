@@ -1,0 +1,10 @@
+timestamp,symbol,score,expected_return,confidence,horizon_steps,is_valid,tag_strategy,tag_reason,tag_llm_model,tag_prompt_version
+2026-03-13 10:12:00,005930,0.35004749999999996,1.7502375,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:13:30,005930,0.46892849999999997,2.3446425,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:14:00,005930,0.4917945,2.4589725000000002,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:14:30,005930,0.2796645,1.3983225,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:15:00,005930,0.3816825,1.9084124999999998,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:15:30,005930,0.1790235,0.8951175,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:16:00,005930,0.1910445,0.9552225000000001,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:16:30,005930,0.1878765,0.9393825,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1
+2026-03-13 10:17:00,005930,-0.057064500000000004,-0.28532250000000003,0.6,1,True,LLMAlphaStrategy,mock: order_imbalance rule,gpt-4o,v1

@@ -1,0 +1,6 @@
+2026-03-13 01:32:58 | INFO    | ============================================================
+2026-03-13 01:32:58 | INFO    | PPO Training
+2026-03-13 01:32:58 | INFO    | ============================================================
+2026-03-13 01:32:58 | INFO    | Env config: {'total_shares': 1000, 'max_steps': 10, 'n_actions': 11, 'impact_coeff': 0.1, 'terminal_penalty_bps': 10.0}
+2026-03-13 01:32:58 | INFO    | PPO config: {'learning_rate': 0.0003, 'n_steps': 2048, 'batch_size': 64}
+2026-03-13 01:32:58 | INFO    | Timesteps: 100

@@ -1,0 +1,9 @@
+{
+  "symbol": "005930",
+  "start_date": "20260313",
+  "end_date": "20260313",
+  "resample_freq": "10s",
+  "seed": 42,
+  "fee_model": "krx",
+  "impact_model": "linear"
+}

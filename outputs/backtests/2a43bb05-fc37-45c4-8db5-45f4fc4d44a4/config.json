@@ -1,0 +1,16 @@
+{
+  "symbol": "005930",
+  "start_date": "2026-03-12",
+  "end_date": "2026-03-12",
+  "initial_cash": 100000000.0,
+  "seed": 42,
+  "slicing_algo": "TWAP",
+  "placement_style": "spread_adaptive",
+  "latency_ms": 1.0,
+  "fee_model": "krx",
+  "impact_model": "linear",
+  "exchange_model": "partial_fill",
+  "queue_model": "prob_queue",
+  "compute_attribution": true,
+  "annualization_factor": 252
+}

@@ -1,0 +1,2 @@
+timestamp,n_states,n_fills,fill_rate,net_pnl,is_bps,annualized_turnover,cancel_rate,sharpe_ratio,max_drawdown,avg_slippage_bps,total_commission
+2026-03-17 01:53:23.472301,697.0,1.0,0.3333333333333333,-4555.838380234947,-13.265138337746617,24.89206768629227,0.9984152139461173,0.0,0.0,-7.812375650516338,1482.3560223536822

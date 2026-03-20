@@ -1,0 +1,28 @@
+name: lob-exec
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - pytorch>=2.1
+  - pytorch-cuda=12.4       # 드라이버 CUDA 13.1 하위호환. conda 최신 제공 버전 (nvidia-smi로 확인)
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - jupyter
+  - ipykernel
+  - pyyaml
+  - tqdm
+  - pip
+  - pip:
+    - gymnasium>=1.0
+    - stable-baselines3>=2.3
+    - tensorboard
+    - omegaconf
+    - openai>=1.0
+    - pydantic>=2.0

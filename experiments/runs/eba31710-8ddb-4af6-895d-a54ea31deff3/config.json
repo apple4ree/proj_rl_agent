@@ -1,0 +1,16 @@
+{
+  "baseline_version": "1.0.0",
+  "symbol": "005930",
+  "start_date": "2026-03-13",
+  "end_date": "2026-03-13",
+  "resample": "1s",
+  "initial_cash": 100000000,
+  "seed": 42,
+  "fee": "krx",
+  "fee_bps": 1.5,
+  "impact": "linear",
+  "slicing": "TWAP",
+  "placement": "spread_adaptive",
+  "overrides": [],
+  "n_states": 20861
+}

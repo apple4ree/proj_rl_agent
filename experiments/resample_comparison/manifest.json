@@ -1,0 +1,189 @@
+{
+  "runs": [
+    {
+      "run_id": "531778b4-c868-49ef-944e-467656cd2503",
+      "timestamp": "2026-03-17 01:53:23.462227",
+      "experiment_name": "resample_comparison",
+      "config": {
+        "symbol": "005930",
+        "start_date": "20260313",
+        "end_date": "20260313",
+        "resample_freq": "5s",
+        "seed": 42,
+        "fee_model": "krx",
+        "impact_model": "linear"
+      },
+      "config_hash": "40e31936595307d37a46da8519cad8a98054501576b179f924164480bb67bcf5",
+      "metrics": {
+        "n_states": 4173.0,
+        "n_fills": 53.0,
+        "fill_rate": 1.9094630387671563,
+        "net_pnl": 129890233.18503375,
+        "is_bps": 2.163615398767979,
+        "annualized_turnover": 71.03527813780875,
+        "cancel_rate": 0.9845119812974868,
+        "sharpe_ratio": 5.384726159944701,
+        "max_drawdown": 0.9999806480173402,
+        "avg_slippage_bps": -0.2579718881473117,
+        "total_commission": 1493845.5143161514
+      },
+      "artifact_paths": {
+        "comparison_csv": "outputs/resample_comparison/005930_20260313.csv"
+      },
+      "tags": [
+        "resample_comparison",
+        "5s"
+      ],
+      "status": "completed",
+      "duration_seconds": 0.00370260002091527
+    },
+    {
+      "run_id": "8e61b068-b9d6-47ec-9280-fe9ff33ac47c",
+      "timestamp": "2026-03-17 01:53:23.467219",
+      "experiment_name": "resample_comparison",
+      "config": {
+        "symbol": "005930",
+        "start_date": "20260313",
+        "end_date": "20260313",
+        "resample_freq": "10s",
+        "seed": 42,
+        "fee_model": "krx",
+        "impact_model": "linear"
+      },
+      "config_hash": "70b6a571b465d77e8d3c0f6cbf9ce765eb9d9939ba568d450633ad6bdc9b0531",
+      "metrics": {
+        "n_states": 2087.0,
+        "n_fills": 110.0,
+        "fill_rate": 1.1821082341391582,
+        "net_pnl": 16068968.073775338,
+        "is_bps": 1.0145391375758623,
+        "annualized_turnover": 41.080063862488934,
+        "cancel_rate": 0.8186356073211315,
+        "sharpe_ratio": 1.2356780929793627,
+        "max_drawdown": 0.9999754732073822,
+        "avg_slippage_bps": 0.3226944980607892,
+        "total_commission": 1850395.195886696
+      },
+      "artifact_paths": {
+        "comparison_csv": "outputs/resample_comparison/005930_20260313.csv"
+      },
+      "tags": [
+        "resample_comparison",
+        "10s"
+      ],
+      "status": "completed",
+      "duration_seconds": 0.0031030119862407446
+    },
+    {
+      "run_id": "dabb6639-c76c-428f-94a6-2bb569ccb055",
+      "timestamp": "2026-03-17 01:53:23.471823",
+      "experiment_name": "resample_comparison",
+      "config": {
+        "symbol": "005930",
+        "start_date": "20260313",
+        "end_date": "20260313",
+        "resample_freq": "30s",
+        "seed": 42,
+        "fee_model": "krx",
+        "impact_model": "linear"
+      },
+      "config_hash": "b29f051e5fdada764efc90d39010b6bfa64afbc651bb84f1bc8ca38d88ea3de4",
+      "metrics": {
+        "n_states": 697.0,
+        "n_fills": 1.0,
+        "fill_rate": 0.3333333333333333,
+        "net_pnl": -4555.838380234947,
+        "is_bps": -13.265138337746617,
+        "annualized_turnover": 24.89206768629227,
+        "cancel_rate": 0.9984152139461173,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "avg_slippage_bps": -7.812375650516338,
+        "total_commission": 1482.3560223536822
+      },
+      "artifact_paths": {
+        "comparison_csv": "outputs/resample_comparison/005930_20260313.csv"
+      },
+      "tags": [
+        "resample_comparison",
+        "30s"
+      ],
+      "status": "completed",
+      "duration_seconds": 0.0029777660965919495
+    },
+    {
+      "run_id": "973e3ca5-10a2-4fa7-82be-e82644be9d51",
+      "timestamp": "2026-03-17 02:29:46.876300",
+      "experiment_name": "resample_comparison",
+      "config": {
+        "symbol": "005930",
+        "start_date": "20260313",
+        "end_date": "20260313",
+        "resample_freq": "10s",
+        "seed": 42,
+        "fee_model": "krx",
+        "impact_model": "linear"
+      },
+      "config_hash": "70b6a571b465d77e8d3c0f6cbf9ce765eb9d9939ba568d450633ad6bdc9b0531",
+      "metrics": {
+        "n_states": 2087.0,
+        "n_fills": 110.0,
+        "fill_rate": 1.1821082341391582,
+        "net_pnl": 16068968.073775338,
+        "is_bps": 1.0145391375758623,
+        "annualized_turnover": 41.080063862488934,
+        "cancel_rate": 0.8186356073211315,
+        "sharpe_ratio": 1.2356780929793627,
+        "max_drawdown": 0.9999754732073822,
+        "avg_slippage_bps": 0.3226944980607892,
+        "total_commission": 1850395.195886696
+      },
+      "artifact_paths": {
+        "comparison_csv": "/tmp/proj_rl_agent_runs/recheck_resample.csv"
+      },
+      "tags": [
+        "resample_comparison",
+        "10s"
+      ],
+      "status": "completed",
+      "duration_seconds": 0.0037739048711955547
+    },
+    {
+      "run_id": "648484e7-90c2-4888-b3eb-017db5b3c128",
+      "timestamp": "2026-03-17 02:29:46.882202",
+      "experiment_name": "resample_comparison",
+      "config": {
+        "symbol": "005930",
+        "start_date": "20260313",
+        "end_date": "20260313",
+        "resample_freq": "30s",
+        "seed": 42,
+        "fee_model": "krx",
+        "impact_model": "linear"
+      },
+      "config_hash": "b29f051e5fdada764efc90d39010b6bfa64afbc651bb84f1bc8ca38d88ea3de4",
+      "metrics": {
+        "n_states": 697.0,
+        "n_fills": 1.0,
+        "fill_rate": 0.3333333333333333,
+        "net_pnl": -4555.838380234947,
+        "is_bps": -13.265138337746617,
+        "annualized_turnover": 24.89206768629227,
+        "cancel_rate": 0.9984152139461173,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "avg_slippage_bps": -7.812375650516338,
+        "total_commission": 1482.3560223536822
+      },
+      "artifact_paths": {
+        "comparison_csv": "/tmp/proj_rl_agent_runs/recheck_resample.csv"
+      },
+      "tags": [
+        "resample_comparison",
+        "30s"
+      ],
+      "status": "completed",
+      "duration_seconds": 0.003297969000414014
+    }
+  ]
+}

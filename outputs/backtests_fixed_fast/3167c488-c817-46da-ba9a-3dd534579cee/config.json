@@ -1,0 +1,66 @@
+{
+  "symbol": "005930",
+  "start_date": "2026-03-12",
+  "end_date": "2026-03-12",
+  "initial_cash": 100000000.0,
+  "seed": 42,
+  "slicing_algo": "TWAP",
+  "placement_style": "spread_adaptive",
+  "latency_ms": 1.0,
+  "fee_model": "krx",
+  "impact_model": "linear",
+  "exchange_model": "partial_fill",
+  "queue_model": "prob_queue",
+  "compute_attribution": true,
+  "annualization_factor": 252,
+  "fee": {
+    "type": "krx",
+    "commission_bps": 1.5,
+    "market": "KOSPI",
+    "include_tax": true
+  },
+  "impact": {
+    "type": "linear",
+    "eta": 0.1,
+    "gamma": 0.01,
+    "sigma": 0.01,
+    "kappa": 0.1
+  },
+  "latency": {
+    "profile": "default",
+    "order_submit_ms": null,
+    "order_ack_ms": null,
+    "cancel_ms": null,
+    "market_data_delay_ms": null,
+    "add_jitter": true,
+    "jitter_std_ms": 0.1
+  },
+  "exchange": {
+    "exchange_model": "partial_fill",
+    "queue_model": "prob_queue",
+    "queue_position_assumption": 0.5
+  },
+  "slicing": {
+    "algo": "TWAP",
+    "interval_seconds": 30.0,
+    "participation_rate": 0.05,
+    "ac_eta": 0.1,
+    "ac_gamma": 0.01,
+    "ac_sigma": 0.01,
+    "ac_T": 100
+  },
+  "placement": {
+    "style": "spread_adaptive",
+    "aggression_spread_threshold_bps": 5.0,
+    "imbalance_threshold": 0.3,
+    "use_market_orders": false,
+    "offset_ticks": 0,
+    "tick_size": 1.0
+  },
+  "risk": {
+    "max_gross_notional": 100000000.0,
+    "max_position": 1000,
+    "default_size": 100,
+    "target_mode": "signal_proportional"
+  }
+}

@@ -1,0 +1,496 @@
+"""
+backtest_config.py
+------------------
+Configuration and result data classes for backtest runs.
+
+Supports both flat (backward-compatible) and nested (qlib-style) configuration.
+Nested configs allow fine-grained parameter control via YAML files.
+"""
+from __future__ import annotations
+
+import copy
+from dataclasses import dataclass, field, asdict
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import yaml
+
+if TYPE_CHECKING:
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Nested sub-config dataclasses (qlib-style)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class FeeConfig:
+    """Transaction fee model configuration."""
+    type: str = "krx"            # krx | zero
+    commission_bps: float = 1.5  # bps (both buy and sell)
+    market: str = "KOSPI"        # KOSPI | KOSDAQ
+    include_tax: bool = True     # Include securities transaction tax on sells
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> FeeConfig:
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class ImpactConfig:
+    """Market impact model configuration."""
+    type: str = "linear"     # linear | sqrt | zero
+    eta: float = 0.1         # LinearImpact 일시적 계수
+    gamma: float = 0.01      # Permanent impact coefficient (linear & sqrt)
+    sigma: float = 0.01      # Volatility (SquareRootImpact)
+    kappa: float = 0.1       # Temporary coefficient (SquareRootImpact)
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> ImpactConfig:
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class LatencyConfig:
+    """지연 model configuration."""
+    profile: str = "default"                    # default | zero | colocation | retail
+    order_submit_ms: float | None = None        # Override profile value
+    order_ack_ms: float | None = None
+    cancel_ms: float | None = None
+    market_data_delay_ms: float | None = None
+    add_jitter: bool = True
+    jitter_std_ms: float = 0.1
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> LatencyConfig:
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class ExchangeConfig:
+    """Exchange simulation configuration."""
+    exchange_model: str = "partial_fill"        # partial_fill | no_partial_fill
+    queue_model: str = "prob_queue"             # price_time | risk_adverse | prob_queue | pro_rata | random
+    queue_position_assumption: float = 0.5      # Assumed queue position (0.0 = front, 1.0 = back)
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> ExchangeConfig:
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class SlicingConfig:
+    """Order slicing algorithm configuration."""
+    algo: str = "TWAP"                  # TWAP | VWAP | POV | AC (Almgren-Chriss)
+    interval_seconds: float = 30.0      # TWAP slice interval
+    participation_rate: float = 0.05   # POV participation rate
+    # Almgren-Chriss parameters
+    ac_eta: float = 0.1
+    ac_gamma: float = 0.01
+    ac_sigma: float = 0.01
+    ac_T: int = 100
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> SlicingConfig:
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class PlacementConfig:
+    """Order placement policy configuration."""
+    style: str = "spread_adaptive"              # spread_adaptive | aggressive | passive | midpoint
+    aggression_spread_threshold_bps: float = 5.0
+    imbalance_threshold: float = 0.3
+    use_market_orders: bool = False             # AggressivePlacement
+    offset_ticks: int = 0                       # PassivePlacement
+    tick_size: float = 1.0                      # PassivePlacement
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> PlacementConfig:
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class RiskConfig:
+    """Risk limits and target sizing configuration."""
+    max_gross_notional: float | None = None     # Defaults to initial_cash
+    max_position: int = 1000                    # Maximum position size (shares)
+    default_size: int = 100                     # Default order size
+    target_mode: str = "signal_proportional"   # signal_proportional | fixed_size | Kelly
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> RiskConfig:
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+# ---------------------------------------------------------------------------
+# Main BacktestConfig
+# ---------------------------------------------------------------------------
+
+@dataclass
+class BacktestConfig:
+    """
+    Full configuration for one backtest run.
+
+    Supports both flat construction (backward compatible) and nested config
+    construction (qlib-style). When nested configs are None, they are
+    automatically synthesized from flat fields in __post_init__.
+
+    속성
+    ----------
+    symbol : str
+        Primary instrument symbol (e.g. '005930').
+    start_date : str
+        Inclusive start date, e.g. '2023-01-02'.
+    end_date : str
+        Inclusive end date, e.g. '2023-12-29'.
+    initial_cash : float
+        Starting cash in KRW.
+    seed : int
+        Global random seed for reproducibility.
+    slicing_algo : str
+        'TWAP' | 'VWAP' | 'POV' | 'AC' (flat, deprecated in favor of slicing.algo)
+    placement_style : str
+        'spread_adaptive' | 'aggressive' | 'passive' | 'midpoint' (flat)
+    latency_ms : float
+        Order-to-acknowledgement latency in milliseconds (flat).
+    fee_model : str
+        'krx' | 'zero' | 'flat_bps' (flat)
+    impact_model : str
+        'linear' | 'sqrt' | 'zero' (flat)
+    exchange_model : str
+        'partial_fill' | 'no_partial_fill' (flat)
+    queue_model : str
+        'prob_queue' | 'risk_adverse' | 'price_time' | 'pro_rata' | 'random' (flat)
+    compute_attribution : bool
+        Whether to run the full attribution analysis (slower).
+    annualization_factor : int
+        Trading days per year for risk metric annualization.
+
+    Nested Configs (optional, override flat fields when provided)
+    -------------------------------------------------------------
+    fee : FeeConfig
+    impact : ImpactConfig
+    latency : LatencyConfig
+    exchange : ExchangeConfig
+    slicing : SlicingConfig
+    placement : PlacementConfig
+    risk : RiskConfig
+    """
+    # --- Required ---
+    symbol: str
+    start_date: str
+    end_date: str
+
+    # --- Top-level scalars ---
+    initial_cash: float = 1e8
+    seed: int = 42
+
+    # --- Flat fields (backward compat) ---
+    slicing_algo: str = "TWAP"
+    placement_style: str = "spread_adaptive"
+    latency_ms: float = 1.0
+    fee_model: str = "krx"
+    impact_model: str = "linear"
+    exchange_model: str = "partial_fill"
+    queue_model: str = "prob_queue"
+
+    compute_attribution: bool = True
+    annualization_factor: int = 252
+
+    # --- Nested configs (qlib-style) ---
+    fee: FeeConfig | None = field(default=None)
+    impact: ImpactConfig | None = field(default=None)
+    latency: LatencyConfig | None = field(default=None)
+    exchange: ExchangeConfig | None = field(default=None)
+    slicing: SlicingConfig | None = field(default=None)
+    placement: PlacementConfig | None = field(default=None)
+    risk: RiskConfig | None = field(default=None)
+
+    def __post_init__(self) -> None:
+        self._resolve_configs()
+        self._validate()
+
+    def _resolve_configs(self) -> None:
+        """Synthesize nested configs from flat fields if not provided."""
+        if self.fee is None:
+            self.fee = FeeConfig(type=self.fee_model)
+        if self.impact is None:
+            self.impact = ImpactConfig(type=self.impact_model)
+        if self.latency is None:
+            self.latency = LatencyConfig()
+        if self.exchange is None:
+            self.exchange = ExchangeConfig(
+                exchange_model=self.exchange_model,
+                queue_model=self.queue_model,
+            )
+        if self.slicing is None:
+            self.slicing = SlicingConfig(algo=self.slicing_algo)
+        if self.placement is None:
+            self.placement = PlacementConfig(style=self.placement_style)
+        if self.risk is None:
+            self.risk = RiskConfig()
+
+        # Sync max_gross_notional default
+        if self.risk.max_gross_notional is None:
+            self.risk.max_gross_notional = self.initial_cash
+
+    def _validate(self) -> None:
+        """Validate configuration values."""
+        errors: list[str] = []
+
+        # Fee config
+        if self.fee.type not in {"krx", "zero"}:
+            errors.append(f"fee.type must be 'krx' or 'zero', got '{self.fee.type}'")
+        if self.fee.market not in {"KOSPI", "KOSDAQ"}:
+            errors.append(f"fee.market must be 'KOSPI' or 'KOSDAQ', got '{self.fee.market}'")
+        if self.fee.commission_bps < 0:
+            errors.append(f"fee.commission_bps must be >= 0, got {self.fee.commission_bps}")
+
+        # Impact config
+        if self.impact.type not in {"linear", "sqrt", "zero"}:
+            errors.append(f"impact.type must be 'linear', 'sqrt', or 'zero', got '{self.impact.type}'")
+        if self.impact.eta < 0:
+            errors.append(f"impact.eta must be >= 0, got {self.impact.eta}")
+
+        # 지연 config
+        if self.latency.profile not in {"default", "zero", "colocation", "retail"}:
+            errors.append(f"latency.profile must be 'default', 'zero', 'colocation', or 'retail', got '{self.latency.profile}'")
+
+        # Exchange config
+        if self.exchange.exchange_model not in {"partial_fill", "no_partial_fill"}:
+            errors.append(f"exchange.exchange_model must be 'partial_fill' or 'no_partial_fill', got '{self.exchange.exchange_model}'")
+        valid_queue = {"price_time", "risk_adverse", "prob_queue", "pro_rata", "random"}
+        if self.exchange.queue_model not in valid_queue:
+            errors.append(f"exchange.queue_model must be one of {valid_queue}, got '{self.exchange.queue_model}'")
+
+        # Slicing config
+        if self.slicing.algo.upper() not in {"TWAP", "VWAP", "POV", "AC"}:
+            errors.append(f"slicing.algo must be 'TWAP', 'VWAP', 'POV', or 'AC', got '{self.slicing.algo}'")
+
+        # 배치 config
+        if self.placement.style not in {"spread_adaptive", "aggressive", "passive", "midpoint"}:
+            errors.append(f"placement.style must be 'spread_adaptive', 'aggressive', 'passive', or 'midpoint', got '{self.placement.style}'")
+
+        # Risk config
+        if self.risk.target_mode not in {"signal_proportional", "fixed_size", "Kelly"}:
+            errors.append(f"risk.target_mode must be 'signal_proportional', 'fixed_size', or 'Kelly', got '{self.risk.target_mode}'")
+
+        # Top-level
+        if self.initial_cash <= 0:
+            errors.append(f"initial_cash must be > 0, got {self.initial_cash}")
+        if self.seed < 0:
+            errors.append(f"seed must be >= 0, got {self.seed}")
+
+        if errors:
+            raise ValueError("BacktestConfig validation failed:\n  - " + "\n  - ".join(errors))
+
+    # ------------------------------------------------------------------
+    # Serialization
+    # ------------------------------------------------------------------
+
+    def to_dict(self) -> dict:
+        """Serialize to dict including nested configs."""
+        return {
+            "symbol": self.symbol,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "initial_cash": self.initial_cash,
+            "seed": self.seed,
+            "slicing_algo": self.slicing_algo,
+            "placement_style": self.placement_style,
+            "latency_ms": self.latency_ms,
+            "fee_model": self.fee_model,
+            "impact_model": self.impact_model,
+            "exchange_model": self.exchange_model,
+            "queue_model": self.queue_model,
+            "compute_attribution": self.compute_attribution,
+            "annualization_factor": self.annualization_factor,
+            # Nested configs
+            "fee": self.fee.to_dict() if self.fee else None,
+            "impact": self.impact.to_dict() if self.impact else None,
+            "latency": self.latency.to_dict() if self.latency else None,
+            "exchange": self.exchange.to_dict() if self.exchange else None,
+            "slicing": self.slicing.to_dict() if self.slicing else None,
+            "placement": self.placement.to_dict() if self.placement else None,
+            "risk": self.risk.to_dict() if self.risk else None,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> BacktestConfig:
+        """
+        Create BacktestConfig from dict.
+
+        Handles both flat-only dicts and dicts with nested config sections.
+        """
+        d = copy.deepcopy(d)
+
+        # Type coercion for numeric fields that may come as strings from YAML
+        numeric_fields = {
+            "initial_cash": float,
+            "seed": int,
+            "latency_ms": float,
+            "annualization_factor": int,
+        }
+        for field_name, type_fn in numeric_fields.items():
+            if field_name in d and isinstance(d[field_name], str):
+                d[field_name] = type_fn(d[field_name])
+
+        # Extract nested configs if present
+        nested_keys = ["fee", "impact", "latency", "exchange", "slicing", "placement", "risk"]
+        nested: dict[str, Any] = {}
+        for key in nested_keys:
+            if key in d and isinstance(d[key], dict):
+                nested[key] = d.pop(key)
+
+        # Build nested config objects
+        if "fee" in nested:
+            d["fee"] = FeeConfig.from_dict(nested["fee"])
+        if "impact" in nested:
+            d["impact"] = ImpactConfig.from_dict(nested["impact"])
+        if "latency" in nested:
+            d["latency"] = LatencyConfig.from_dict(nested["latency"])
+        if "exchange" in nested:
+            d["exchange"] = ExchangeConfig.from_dict(nested["exchange"])
+        if "slicing" in nested:
+            d["slicing"] = SlicingConfig.from_dict(nested["slicing"])
+        if "placement" in nested:
+            d["placement"] = PlacementConfig.from_dict(nested["placement"])
+        if "risk" in nested:
+            d["risk"] = RiskConfig.from_dict(nested["risk"])
+
+        # Filter to valid fields only
+        valid_fields = set(cls.__dataclass_fields__.keys())
+        filtered = {k: v for k, v in d.items() if k in valid_fields}
+
+        return cls(**filtered)
+
+    @classmethod
+    def from_yaml(cls, path: str | Path) -> BacktestConfig:
+        """Load BacktestConfig from a YAML file."""
+        path = Path(path)
+        with path.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return cls.from_dict(data)
+
+    def to_yaml(self, path: str | Path) -> None:
+        """Save BacktestConfig to a YAML file."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", encoding="utf-8") as f:
+            yaml.dump(self.to_dict(), f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+    def merge(self, overrides: dict) -> BacktestConfig:
+        """
+        Create a new BacktestConfig with overrides applied.
+
+        Supports both flat overrides (e.g., {"fee_model": "zero"})
+        and nested overrides (e.g., {"fee": {"commission_bps": 0.5}}).
+        """
+        base = self.to_dict()
+
+        for key, value in overrides.items():
+            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                # Deep merge nested configs
+                base[key].update(value)
+            else:
+                base[key] = value
+
+        return BacktestConfig.from_dict(base)
+
+
+# ---------------------------------------------------------------------------
+# BacktestResult (unchanged)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class BacktestResult:
+    """Aggregated output of a completed backtest run."""
+    config: BacktestConfig
+    run_id: str
+    pnl_report: "PnLReport"
+    risk_report: "RiskReport"
+    execution_report: "ExecutionReport"
+    turnover_report: "TurnoverReport"
+    attribution_report: "AttributionReport | None"
+    n_fills: int
+    n_states: int
+    metadata: dict = field(default_factory=dict)
+
+    def summary(self) -> dict[str, float]:
+        """Flat dict of key metrics suitable for logging or comparison tables."""
+        result: dict[str, float] = {
+            "n_fills": float(self.n_fills),
+            "n_states": float(self.n_states),
+        }
+
+        result.update({
+            "total_realized_pnl": self.pnl_report.total_realized,
+            "total_unrealized_pnl": self.pnl_report.total_unrealized,
+            "net_pnl": self.pnl_report.net_pnl,
+            "total_commission": self.pnl_report.total_commission,
+            "total_slippage": self.pnl_report.total_slippage,
+            "total_impact": self.pnl_report.total_impact,
+        })
+
+        result.update({
+            "sharpe_ratio": self.risk_report.sharpe_ratio,
+            "sortino_ratio": self.risk_report.sortino_ratio,
+            "calmar_ratio": self.risk_report.calmar_ratio,
+            "max_drawdown": self.risk_report.max_drawdown,
+            "max_drawdown_duration": float(self.risk_report.max_drawdown_duration),
+            "annualized_vol": self.risk_report.annualized_vol,
+            "var_95": self.risk_report.var_95,
+            "expected_shortfall_95": self.risk_report.expected_shortfall_95,
+        })
+
+        result.update({
+            "fill_rate": self.execution_report.fill_rate,
+            "cancel_rate": self.execution_report.cancel_rate,
+            "is_bps": self.execution_report.implementation_shortfall_bps,
+            "vwap_diff_bps": self.execution_report.vwap_diff_bps,
+            "avg_slippage_bps": self.execution_report.avg_slippage_bps,
+            "avg_market_impact_bps": self.execution_report.avg_market_impact_bps,
+            "timing_score": self.execution_report.timing_score,
+            "partial_fill_rate": self.execution_report.partial_fill_rate,
+            "maker_fill_ratio": self.execution_report.maker_fill_ratio,
+            "avg_latency_ms": self.execution_report.avg_latency_ms,
+        })
+
+        result.update({
+            "annualized_turnover": self.turnover_report.annualized_turnover,
+            "avg_holding_period": self.turnover_report.avg_holding_period,
+            "iqm_return": self.turnover_report.iqm_return,
+        })
+
+        if self.attribution_report is not None:
+            result.update({
+                "alpha_contribution": self.attribution_report.alpha_contribution,
+                "execution_contribution": self.attribution_report.execution_contribution,
+                "cost_contribution": self.attribution_report.cost_contribution,
+                "timing_contribution": self.attribution_report.timing_contribution,
+                "alpha_fraction": self.attribution_report.alpha_fraction,
+            })
+
+        return result

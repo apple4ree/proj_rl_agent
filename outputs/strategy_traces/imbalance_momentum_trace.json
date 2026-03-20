@@ -1,0 +1,30 @@
+{
+  "pipeline": "template_generator_v1",
+  "timestamp": "2026-03-20T02:29:24.132952+00:00",
+  "input": {
+    "research_goal": "test",
+    "n_ideas": 3,
+    "idea_index": 0,
+    "latency_ms": 1.0
+  },
+  "selection": {
+    "goal_matched_indices": [
+      0,
+      1,
+      2
+    ],
+    "chosen_template_index": 0,
+    "template_name": "imbalance_momentum"
+  },
+  "output": {
+    "spec_name": "imbalance_momentum",
+    "spec_version": "1.0",
+    "n_signal_rules": 4,
+    "n_filters": 1,
+    "n_exit_rules": 3
+  },
+  "latency_calibration": {
+    "latency_ms": 1.0,
+    "factor": 1.0
+  }
+}

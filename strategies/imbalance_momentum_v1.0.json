@@ -1,0 +1,78 @@
+{
+  "name": "imbalance_momentum",
+  "version": "1.0",
+  "description": "Order-book imbalance predicts short-term price direction. Buy when bid-heavy, sell when ask-heavy. Depth imbalance acts as confirming signal.",
+  "signal_rules": [
+    {
+      "feature": "order_imbalance",
+      "operator": ">",
+      "threshold": 0.3,
+      "score_contribution": 0.5,
+      "description": "Bid-heavy imbalance → bullish"
+    },
+    {
+      "feature": "order_imbalance",
+      "operator": "<",
+      "threshold": -0.3,
+      "score_contribution": -0.5,
+      "description": "Ask-heavy imbalance → bearish"
+    },
+    {
+      "feature": "depth_imbalance",
+      "operator": ">",
+      "threshold": 0.2,
+      "score_contribution": 0.3,
+      "description": "Deep bid side confirms bullish bias"
+    },
+    {
+      "feature": "depth_imbalance",
+      "operator": "<",
+      "threshold": -0.2,
+      "score_contribution": -0.3,
+      "description": "Deep ask side confirms bearish bias"
+    }
+  ],
+  "filters": [
+    {
+      "feature": "spread_bps",
+      "operator": ">",
+      "threshold": 30.0,
+      "action": "block",
+      "description": "Skip when spread is too wide — execution cost dominates"
+    }
+  ],
+  "position_rule": {
+    "max_position": 500,
+    "sizing_mode": "signal_proportional",
+    "fixed_size": 100,
+    "holding_period_ticks": 10,
+    "inventory_cap": 500
+  },
+  "exit_rules": [
+    {
+      "exit_type": "stop_loss",
+      "threshold_bps": 15.0,
+      "timeout_ticks": 0,
+      "description": "Cut losses at 15 bps"
+    },
+    {
+      "exit_type": "take_profit",
+      "threshold_bps": 25.0,
+      "timeout_ticks": 0,
+      "description": "Take profit at 25 bps"
+    },
+    {
+      "exit_type": "time_exit",
+      "threshold_bps": 0.0,
+      "timeout_ticks": 300,
+      "description": "Force exit after 300 ticks"
+    }
+  ],
+  "metadata": {
+    "research_goal": "test",
+    "idea_name": "imbalance_momentum",
+    "latency_ms": 1.0,
+    "pipeline": "template_generator_v1",
+    "generated_at": "2026-03-20T02:29:24.132855+00:00"
+  }
+}
