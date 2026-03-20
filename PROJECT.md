@@ -19,9 +19,14 @@
 ```
 proj_rl_agent/
 ├── src/
-│   ├── strategy_generation/   # 템플릿 기반 전략 생성
+│   ├── strategy_generation/   # 전략 생성 (template / OpenAI multi-agent)
 │   │   ├── templates.py       # 5개 전략 템플릿 + 키워드 매칭
-│   │   └── generator.py       # StrategyGenerator (latency 보정 포함)
+│   │   ├── generator.py       # StrategyGenerator (backend 선택 + fallback)
+│   │   ├── pipeline.py        # MultiAgentPipeline (4-agent 오케스트레이션)
+│   │   ├── agents.py          # Researcher/FactorDesigner/RiskDesigner/LLMReviewer
+│   │   ├── agent_schemas.py   # Pydantic 스키마 (IdeaBrief, SignalDraft, RiskDraft 등)
+│   │   ├── assembler.py       # Agent 출력 → StrategySpec 결정론적 변환
+│   │   └── openai_client.py   # OpenAI API 클라이언트 (live/replay/mock)
 │   │
 │   ├── strategy_review/       # 정적 규칙 기반 전략 검토
 │   │   └── reviewer.py        # StrategyReviewer (7개 검증 카테고리)
@@ -68,10 +73,22 @@ proj_rl_agent/
 
 ### StrategyGenerator
 
-`src/strategy_generation/` — 템플릿 기반 전략 사양 생성기.
+`src/strategy_generation/` — 두 가지 backend를 병행 지원하는 전략 사양 생성기.
 
+**Template backend** (기본, `--backend template`):
 - `--goal` 키워드에서 관련 템플릿 자동 선택 (가장 적합한 1개 생성)
 - 5개 내장 템플릿: imbalance_momentum, spread_mean_reversion, trade_flow_pressure, depth_divergence, micro_price_alpha
+
+**OpenAI multi-agent backend** (`--backend openai`):
+- 4-Agent 파이프라인: Researcher → FactorDesigner → RiskDesigner → LLMReviewer
+- OpenAI Structured Outputs로 Pydantic 스키마 기반 응답 생성
+- 결정론적 Assembler가 agent 출력을 StrategySpec으로 변환
+- API 실패 시 자동으로 template backend fallback
+- `--mode mock`으로 API 키 없이 agent fallback 테스트 가능
+
+공통:
+- Static reviewer는 양쪽 backend 모두 필수 hard gate
+- 백테스트 코어(Layer 0~7)는 backend에 무관하게 동일
 - 생성된 Spec은 `StrategyRegistry`에 저장, trace JSON도 별도 저장
 
 ### StrategyReviewer

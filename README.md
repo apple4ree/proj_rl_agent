@@ -8,7 +8,7 @@ LOB(호가창) 틱 데이터 기반 **전략 생성 → 검토 → 컴파일 →
 
 | 구성요소 | 역할 |
 |---------|------|
-| **Strategy Generation** | 템플릿 기반 전략 사양 생성 (goal 키워드 매칭 + latency 보정) |
+| **Strategy Generation** | 전략 사양 생성 — template backend (기본) 또는 OpenAI multi-agent backend |
 | **Strategy Review** | 정적 규칙 기반 사양 검토 (schema, risk, redundancy, feature 검증) |
 | **Strategy Spec** | JSON 기반 전략 명세 (signal, filter, position, exit rules) |
 | **Strategy Compiler** | Spec → 실행 가능한 Strategy 객체로 변환 |
@@ -20,7 +20,7 @@ LOB(호가창) 틱 데이터 기반 **전략 생성 → 검토 → 컴파일 →
 ```
 proj_rl_agent/
 ├── src/
-│   ├── strategy_generation/   # 템플릿 기반 전략 생성
+│   ├── strategy_generation/   # 전략 생성 (template / OpenAI multi-agent)
 │   ├── strategy_review/       # 정적 규칙 기반 전략 검토
 │   ├── strategy_specs/        # 전략 사양 스키마
 │   ├── strategy_compiler/     # Spec → Strategy 컴파일러
@@ -57,9 +57,13 @@ proj_rl_agent/
 ```bash
 cd /home/dgu/tick/proj_rl_agent
 
-# 1. 전략 생성
+# 1. 전략 생성 (template backend — 기본)
 PYTHONPATH=src python scripts/generate_strategy.py \
     --goal "Order imbalance alpha"
+
+# 1-alt. 전략 생성 (OpenAI multi-agent backend)
+OPENAI_API_KEY=sk-... PYTHONPATH=src python scripts/generate_strategy.py \
+    --goal "Order imbalance alpha" --backend openai
 
 # 2. 전략 검토
 PYTHONPATH=src python scripts/review_strategy.py \

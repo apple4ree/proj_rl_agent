@@ -1,35 +1,35 @@
 {
   "name": "imbalance_momentum",
   "version": "1.0",
-  "description": "Order-book imbalance predicts short-term price direction. Buy when bid-heavy, sell when ask-heavy. Depth imbalance acts as confirming signal.",
+  "description": "Order book imbalance predicts short-term price direction",
   "signal_rules": [
     {
       "feature": "order_imbalance",
       "operator": ">",
       "threshold": 0.3,
       "score_contribution": 0.5,
-      "description": "Bid-heavy imbalance → bullish"
+      "description": "Bullish order_imbalance"
     },
     {
       "feature": "order_imbalance",
       "operator": "<",
       "threshold": -0.3,
       "score_contribution": -0.5,
-      "description": "Ask-heavy imbalance → bearish"
+      "description": "Bearish order_imbalance"
     },
     {
       "feature": "depth_imbalance",
       "operator": ">",
       "threshold": 0.2,
       "score_contribution": 0.3,
-      "description": "Deep bid side confirms bullish bias"
+      "description": "Supporting bullish depth_imbalance"
     },
     {
       "feature": "depth_imbalance",
       "operator": "<",
       "threshold": -0.2,
       "score_contribution": -0.3,
-      "description": "Deep ask side confirms bearish bias"
+      "description": "Supporting bearish depth_imbalance"
     }
   ],
   "filters": [
@@ -38,7 +38,7 @@
       "operator": ">",
       "threshold": 30.0,
       "action": "block",
-      "description": "Skip when spread is too wide — execution cost dominates"
+      "description": "Block on wide spread"
     }
   ],
   "position_rule": {
@@ -46,14 +46,14 @@
     "sizing_mode": "signal_proportional",
     "fixed_size": 100,
     "holding_period_ticks": 10,
-    "inventory_cap": 500
+    "inventory_cap": 1000
   },
   "exit_rules": [
     {
       "exit_type": "stop_loss",
       "threshold_bps": 15.0,
       "timeout_ticks": 0,
-      "description": "Cut losses at 15 bps"
+      "description": "Stop loss at 15 bps"
     },
     {
       "exit_type": "take_profit",
@@ -65,14 +65,17 @@
       "exit_type": "time_exit",
       "threshold_bps": 0.0,
       "timeout_ticks": 300,
-      "description": "Force exit after 300 ticks"
+      "description": "Time exit after 300 ticks"
     }
   ],
   "metadata": {
     "research_goal": "test",
     "idea_name": "imbalance_momentum",
+    "idea_thesis": "Order book imbalance predicts short-term price direction",
+    "idea_style": "momentum",
     "latency_ms": 1.0,
-    "pipeline": "template_generator_v1",
-    "generated_at": "2026-03-20T02:29:24.132855+00:00"
+    "latency_factor": 1.0,
+    "pipeline": "multi_agent_openai_v1",
+    "generated_at": "2026-03-20T05:34:31.207288+00:00"
   }
 }
