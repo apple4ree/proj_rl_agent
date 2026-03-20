@@ -1,3 +1,0 @@
-Best mean_val_sharpe: variant=both (mean=0.5114, CI=[0.4131, 0.6292])
-Best mean_val_pnl: variant=both (mean=234.3844, CI=[165.7145, 304.4747])
-inv_only vs no_penalty (mean_val_sharpe): delta=+0.1358 (higher), p=0.0182*, d=2.121

@@ -1,2 +1,0 @@
-scenario,symbol,resample,n_seeds,seeds,n_states,data_hash,feature_set_version,mean_val_sharpe_mean,mean_val_sharpe_std,std_val_sharpe_mean,std_val_sharpe_std,best_val_sharpe_mean,best_val_sharpe_std,mean_val_pnl_mean,mean_val_pnl_std,elapsed_s_mean,elapsed_s_std
-samsung_0313,005930,5s,2,"[0, 42]",4173,8e0ddee60881e60f,1.0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,515.54,39.21614208460591

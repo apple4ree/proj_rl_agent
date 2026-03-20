@@ -1,3 +1,0 @@
-order_id,symbol,side,total_qty,filled_qty,remaining_qty,urgency,status,arrival_mid,avg_fill_price,n_children,fill_rate
-26fd7212-5664-4747-9d19-4b5f5475dd44,005930,BUY,54,54,0,0.35004749999999996,FILLED,183150.0,183006.9163399608,3,1.0
-17d187b8-9fb7-4de4-b22c-06f688d8265e,005930,SELL,108,0,108,0.057064500000000004,PENDING,183550.0,,625,0.0

@@ -1,2 +1,0 @@
-timestamp,sharpe_ratio,net_pnl,n_fills,fill_rate,is_bps,max_drawdown,annualized_turnover,avg_latency_ms,llm_call_count,llm_error_rate,estimated_llm_cost,avg_llm_latency_ms
-2026-03-17 12:23:44.851852,4.54153333959406,76177878.28666562,49.0,1.8202692003167062,6.275171587404242,0.999824516941363,66.46396497302707,1.5315665662999254,1985,0.0,0.0,0.05394060467311207
